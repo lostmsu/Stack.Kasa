@@ -10,12 +10,16 @@ using LostTech.Stack.Widgets.DataSources;
 using Prism.Commands;
 
 public sealed class KasaOutlet : DependencyObjectNotifyBase, IRefreshable {
-    readonly Core.IKasaOutlet outlet;
+    Core.IKasaOutlet? outlet;
     public string? Error { get; private set; }
 
-    public KasaOutlet(string hostOrIP) {
-        this.outlet = new Core.KasaOutlet(hostOrIP);
+    public KasaOutlet() {
         this.RefreshCommand = new DelegateCommand(this.TryRefreshInternal);
+    }
+
+    public string? HostOrIP {
+        get => this.outlet?.Hostname;
+        set => this.outlet = value is null ? null : new Core.KasaOutlet(value);
     }
 
     /// <summary>
@@ -30,6 +34,11 @@ public sealed class KasaOutlet : DependencyObjectNotifyBase, IRefreshable {
     public ICommand RefreshCommand { get; }
 
     async void RefreshInternal() {
+        if (this.outlet is null) {
+            this.Error = "No outlet selected";
+            this.OnPropertyChanged(nameof(this.Error));
+            return;
+        }
         var power = await this.outlet.EnergyMeter.GetInstantaneousPowerUsage();
         this.Power = power.Power * 0.001m;
         this.OnPropertyChanged(nameof(this.Power));
