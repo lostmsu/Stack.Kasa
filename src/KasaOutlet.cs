@@ -8,6 +8,7 @@ using LostTech.Stack.Widgets.DataBinding;
 using LostTech.Stack.Widgets.DataSources;
 
 using Prism.Commands;
+using System.IO;
 
 public sealed class KasaOutlet : DependencyObjectNotifyBase, IRefreshable {
     Core.IKasaOutlet? outlet;
@@ -39,11 +40,26 @@ public sealed class KasaOutlet : DependencyObjectNotifyBase, IRefreshable {
             this.OnPropertyChanged(nameof(this.Error));
             return;
         }
-        var power = await this.outlet.EnergyMeter.GetInstantaneousPowerUsage();
+        Core.PowerUsage power;
+        try {
+            power = await this.outlet.EnergyMeter.GetInstantaneousPowerUsage();
+        } catch (IOException e) {
+            this.Error = e.Message;
+            this.OnPropertyChanged(nameof(this.Error));
+            this.outlet = new Core.KasaOutlet(this.outlet.Hostname);
+            return;
+        }
+        this.ClearError();
         this.Power = power.Power * 0.001m;
         this.OnPropertyChanged(nameof(this.Power));
         this.Voltage = power.Voltage * 0.001m;
         this.OnPropertyChanged(nameof(this.Voltage));
+    }
+
+    void ClearError() {
+        if (this.Error is null) return;
+        this.Error = null;
+        this.OnPropertyChanged(nameof(this.Error));
     }
 
     void TryRefreshInternal() {
