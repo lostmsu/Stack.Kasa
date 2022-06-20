@@ -58,6 +58,9 @@ public sealed class KasaOutlet : DependencyObjectNotifyBase, IRefreshable {
         } catch (InvalidOperationException e) {
             SetErrorAndReconnect(e);
             return;
+        } catch (global::Kasa.NetworkException e) {
+            SetErrorAndReconnect(e);
+            return;
         }
         this.ClearError();
         this.Power = power.Power * 0.001m;
