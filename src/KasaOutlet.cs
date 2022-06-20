@@ -9,6 +9,7 @@ using LostTech.Stack.Widgets.DataSources;
 
 using Prism.Commands;
 using System.IO;
+using System.Net.Sockets;
 
 public sealed class KasaOutlet : DependencyObjectNotifyBase, IRefreshable {
     Core.IKasaOutlet? outlet;
@@ -41,12 +42,18 @@ public sealed class KasaOutlet : DependencyObjectNotifyBase, IRefreshable {
             return;
         }
         Core.PowerUsage power;
+        void SetErrorAndReconnect(Exception error) {
+            this.Error = error.Message;
+            this.OnPropertyChanged(nameof(this.Error));
+            this.outlet = new Core.KasaOutlet(this.outlet!.Hostname);
+        }
         try {
             power = await this.outlet.EnergyMeter.GetInstantaneousPowerUsage();
         } catch (IOException e) {
-            this.Error = e.Message;
-            this.OnPropertyChanged(nameof(this.Error));
-            this.outlet = new Core.KasaOutlet(this.outlet.Hostname);
+            SetErrorAndReconnect(e);
+            return;
+        } catch (SocketException e) {
+            SetErrorAndReconnect(e);
             return;
         }
         this.ClearError();
