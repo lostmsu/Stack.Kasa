@@ -21,7 +21,7 @@
   </ItemGroup>
 
   <ItemGroup>
-    <PackageReference Include="Kasa" Version="0.0.0-snapshot" />
+    <PackageReference Include="Kasa" Version="0.0.0" />
     <PackageReference Include="LostTech.Stack.Widgets" Version="3.0.0-a1" />
     <!-- The following is recommended for public projects -->
     <PackageReference Include="Microsoft.SourceLink.GitHub" Version="1.1.1" PrivateAssets="All" />

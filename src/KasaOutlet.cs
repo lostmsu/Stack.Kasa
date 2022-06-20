@@ -43,7 +43,7 @@ public sealed class KasaOutlet : DependencyObjectNotifyBase, IRefreshable {
         }
         Core.PowerUsage power;
         void SetErrorAndReconnect(Exception error) {
-            this.Error = error.Message;
+            this.Error = $"{error.GetType().Name}: {error.Message}";
             this.OnPropertyChanged(nameof(this.Error));
             this.outlet = new Core.KasaOutlet(this.outlet!.Hostname);
         }
@@ -53,6 +53,9 @@ public sealed class KasaOutlet : DependencyObjectNotifyBase, IRefreshable {
             SetErrorAndReconnect(e);
             return;
         } catch (SocketException e) {
+            SetErrorAndReconnect(e);
+            return;
+        } catch (InvalidOperationException e) {
             SetErrorAndReconnect(e);
             return;
         }
