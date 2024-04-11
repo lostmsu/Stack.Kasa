@@ -10,9 +10,12 @@ using LostTech.Stack.Widgets.DataSources;
 using Prism.Commands;
 using System.IO;
 using System.Net.Sockets;
+using global::Kasa;
 
-public sealed class KasaOutlet : DependencyObjectNotifyBase, IRefreshable {
-    Core.IKasaOutlet? outlet;
+public sealed class KasaOutlet: DependencyObjectNotifyBase, IRefreshable {
+    IKasaOutlet.IEnergyMeterCommands? outlet;
+    string? hostOrIP = null;
+    string? childID = null;
     public string? Error { get; private set; }
 
     public KasaOutlet() {
@@ -20,8 +23,28 @@ public sealed class KasaOutlet : DependencyObjectNotifyBase, IRefreshable {
     }
 
     public string? HostOrIP {
-        get => this.outlet?.Hostname;
-        set => this.outlet = value is null ? null : new Core.KasaOutlet(value);
+        get => this.hostOrIP;
+        set {
+            this.hostOrIP = value;
+            this.UpdateOutlet();
+        }
+    }
+
+    public string? ChildID {
+        get => this.childID;
+        set {
+            this.childID = value;
+            this.UpdateOutlet();
+        }
+    }
+
+    void UpdateOutlet() {
+        this.outlet =
+            this.hostOrIP is null
+            ? null :
+                (this.childID is null
+                ? new Core.KasaOutlet(this.hostOrIP).EnergyMeter
+                : new Core.KasaStripOutlet(this.hostOrIP, this.childID));
     }
 
     /// <summary>
@@ -45,10 +68,10 @@ public sealed class KasaOutlet : DependencyObjectNotifyBase, IRefreshable {
         void SetErrorAndReconnect(Exception error) {
             this.Error = $"{error.GetType().Name}: {error.Message}";
             this.OnPropertyChanged(nameof(this.Error));
-            this.outlet = new Core.KasaOutlet(this.outlet!.Hostname);
+            this.UpdateOutlet();
         }
         try {
-            power = await this.outlet.EnergyMeter.GetInstantaneousPowerUsage();
+            power = await this.outlet.GetInstantaneousPowerUsage();
         } catch (IOException e) {
             SetErrorAndReconnect(e);
             return;
