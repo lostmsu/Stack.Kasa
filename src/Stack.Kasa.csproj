@@ -1,8 +1,8 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
-    <TargetFramework>net6.0-windows10.0.19041.0</TargetFramework>
-    <LangVersion>10.0</LangVersion>
+    <TargetFramework>net8.0-windows10.0.26100.0</TargetFramework>
+    <LangVersion>12.0</LangVersion>
     <Nullable>enable</Nullable>
 
     <!-- Package stuff -->
@@ -24,7 +24,7 @@
     <PackageReference Include="Kasa.Strip" Version="0.0.1" />
     <PackageReference Include="LostTech.Stack.Widgets" Version="3.0.0-a1" />
     <!-- The following is recommended for public projects -->
-    <PackageReference Include="Microsoft.SourceLink.GitHub" Version="1.1.1" PrivateAssets="All" />
+    <PackageReference Include="Microsoft.SourceLink.GitHub" Version="8.0.0" PrivateAssets="All" />
   </ItemGroup>
 
 </Project>
